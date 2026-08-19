@@ -9,7 +9,9 @@ const deliveryCharge = 50;
 // Stripe initialize
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Placing orders using COD Method
+// ==========================================
+// Place Order - COD
+// ==========================================
 const placeOrder = async (req, res) => {
     try {
         const { userId, items, amount, address } = req.body;
@@ -25,16 +27,21 @@ const placeOrder = async (req, res) => {
         };
 
         const newOrder = new orderModel(orderData);
+
         await newOrder.save();
 
-        await userModel.findByIdAndUpdate(userId, { cartData: {} });
+        await userModel.findByIdAndUpdate(userId, {
+            cartData: {},
+        });
 
         res.json({
             success: true,
             message: "Order Placed",
         });
+
     } catch (error) {
         console.log(error);
+
         res.json({
             success: false,
             message: error.message,
@@ -42,7 +49,9 @@ const placeOrder = async (req, res) => {
     }
 };
 
-// Placing orders using Stripe Method
+// ==========================================
+// Place Order - Stripe
+// ==========================================
 const placeOrderStripe = async (req, res) => {
     try {
         const { userId, items, amount, address } = req.body;
@@ -59,6 +68,7 @@ const placeOrderStripe = async (req, res) => {
         };
 
         const newOrder = new orderModel(orderData);
+
         await newOrder.save();
 
         const line_items = items.map((item) => ({
@@ -72,6 +82,7 @@ const placeOrderStripe = async (req, res) => {
             quantity: item.quantity,
         }));
 
+        // Delivery charge
         line_items.push({
             price_data: {
                 currency: currency,
@@ -86,7 +97,7 @@ const placeOrderStripe = async (req, res) => {
         const session = await stripe.checkout.sessions.create({
             success_url: `${origin}/verify?success=true&orderId=${newOrder._id}`,
             cancel_url: `${origin}/verify?success=false&orderId=${newOrder._id}`,
-            line_items,
+            line_items: line_items,
             mode: "payment",
         });
 
@@ -94,8 +105,10 @@ const placeOrderStripe = async (req, res) => {
             success: true,
             session_url: session.url,
         });
+
     } catch (error) {
         console.log(error);
+
         res.json({
             success: false,
             message: error.message,
@@ -103,12 +116,15 @@ const placeOrderStripe = async (req, res) => {
     }
 };
 
-// Verify Stripe
+// ==========================================
+// Verify Stripe Payment
+// ==========================================
 const verifyStripe = async (req, res) => {
-    const { orderId, success, userId } = req.body;
-
     try {
+        const { orderId, success, userId } = req.body;
+
         if (success === "true") {
+
             await orderModel.findByIdAndUpdate(orderId, {
                 payment: true,
             });
@@ -120,15 +136,19 @@ const verifyStripe = async (req, res) => {
             res.json({
                 success: true,
             });
+
         } else {
+
             await orderModel.findByIdAndDelete(orderId);
 
             res.json({
                 success: false,
             });
         }
+
     } catch (error) {
         console.log(error);
+
         res.json({
             success: false,
             message: error.message,
@@ -136,17 +156,22 @@ const verifyStripe = async (req, res) => {
     }
 };
 
-// All Orders data for Admin Panel
+// ==========================================
+// Get All Orders - Admin
+// ==========================================
 const allOrders = async (req, res) => {
     try {
+
         const orders = await orderModel.find({});
 
         res.json({
             success: true,
-            orders,
+            orders: orders,
         });
+
     } catch (error) {
         console.log(error);
+
         res.json({
             success: false,
             message: error.message,
@@ -154,19 +179,26 @@ const allOrders = async (req, res) => {
     }
 };
 
-// User Order Data For Frontend
+// ==========================================
+// Get User Orders
+// ==========================================
 const userOrders = async (req, res) => {
     try {
+
         const { userId } = req.body;
 
-        const orders = await orderModel.find({ userId });
+        const orders = await orderModel.find({
+            userId: userId,
+        });
 
         res.json({
             success: true,
-            orders,
+            orders: orders,
         });
+
     } catch (error) {
         console.log(error);
+
         res.json({
             success: false,
             message: error.message,
@@ -174,21 +206,26 @@ const userOrders = async (req, res) => {
     }
 };
 
-// Update order status from Admin Panel
+// ==========================================
+// Update Order Status - Admin
+// ==========================================
 const updateStatus = async (req, res) => {
     try {
+
         const { orderId, status } = req.body;
 
         await orderModel.findByIdAndUpdate(orderId, {
-            status,
+            status: status,
         });
 
         res.json({
             success: true,
             message: "Status Updated",
         });
+
     } catch (error) {
         console.log(error);
+
         res.json({
             success: false,
             message: error.message,
@@ -196,6 +233,9 @@ const updateStatus = async (req, res) => {
     }
 };
 
+// ==========================================
+// Exports
+// ==========================================
 export {
     verifyStripe,
     placeOrder,
