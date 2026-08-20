@@ -24,7 +24,15 @@ app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
 
 app.get("/", (req, res) => {
-    res.send("API Working");
+  res.send("API Working");
 });
+
+const PORT = process.env.PORT || 4000;
+
+if (process.env.VERCEL !== "1") {
+  app.listen(PORT, () => {
+    console.log(`Backend running at http://localhost:${PORT}`);
+  });
+}
 
 export default app;
