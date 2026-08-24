@@ -7,12 +7,33 @@ import NewsletterBox from '../components/NewsletterBox'
 
 const Home = () => {
   return (
-    <div>
-      <Hero />
-      <LatestCollection/>
-      <BestSeller/>
-      <OurPolicy/>
-      <NewsletterBox/>
+    <div className="w-full">
+
+      {/* Hero Section */}
+      <section>
+        <Hero />
+      </section>
+
+      {/* Latest Collection */}
+      <section className="mt-16 sm:mt-20">
+        <LatestCollection />
+      </section>
+
+      {/* Best Sellers */}
+      <section className="mt-16 sm:mt-20">
+        <BestSeller />
+      </section>
+
+      {/* Our Policy */}
+      <section className="mt-16 sm:mt-24">
+        <OurPolicy />
+      </section>
+
+      {/* Newsletter */}
+      <section className="mt-16 sm:mt-24 pb-16">
+        <NewsletterBox />
+      </section>
+
     </div>
   )
 }
