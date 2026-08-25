@@ -23,51 +23,54 @@ const Navbar = () => {
   }
 
   const navLinkClass = ({ isActive }) =>
-    `relative flex flex-col items-center gap-1 text-[13px] font-medium tracking-wide transition-colors duration-300 ${
-      isActive ? 'text-black' : 'text-gray-500 hover:text-black'
+    `relative flex flex-col items-center gap-1 text-[13px] font-semibold tracking-wider transition-colors duration-300 ${
+      isActive ? 'text-slate-900' : 'text-slate-500 hover:text-slate-900'
     }`
 
   return (
     <>
-      {/* Navbar */}
-      <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur-md">
-        <div className="mx-auto flex h-[72px] max-w-[1600px] items-center justify-between px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
+      {/* Navbar Container */}
+      <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-md transition-all">
+        <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
           {/* Logo */}
           <Link to="/" className="shrink-0">
             <img
               src={assets.logo}
-              className="w-32 transition-transform duration-300 hover:scale-[1.02] sm:w-36"
+              className="w-28 transition-transform duration-300 hover:scale-[1.03] sm:w-36"
               alt="Store Logo"
             />
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden sm:block">
-            <ul className="flex items-center gap-7 lg:gap-10">
+            <ul className="flex items-center gap-8 lg:gap-12">
 
               <NavLink to="/" className={navLinkClass}>
                 <span>HOME</span>
-                <span className="absolute -bottom-2 h-[2px] w-0 bg-black transition-all duration-300 group-hover:w-full" />
+                <span className="absolute -bottom-1.5 h-[2px] w-0 bg-slate-900 transition-all duration-300 group-hover:w-full" />
               </NavLink>
 
               <NavLink to="/collection" className={navLinkClass}>
                 <span>COLLECTION</span>
+                <span className="absolute -bottom-1.5 h-[2px] w-0 bg-slate-900 transition-all duration-300 group-hover:w-full" />
               </NavLink>
 
               <NavLink to="/about" className={navLinkClass}>
                 <span>ABOUT</span>
+                <span className="absolute -bottom-1.5 h-[2px] w-0 bg-slate-900 transition-all duration-300 group-hover:w-full" />
               </NavLink>
 
               <NavLink to="/contact" className={navLinkClass}>
                 <span>CONTACT</span>
+                <span className="absolute -bottom-1.5 h-[2px] w-0 bg-slate-900 transition-all duration-300 group-hover:w-full" />
               </NavLink>
 
             </ul>
           </nav>
 
-          {/* Right Icons */}
-          <div className="flex items-center gap-5 sm:gap-6">
+          {/* Action Icons */}
+          <div className="flex items-center gap-4 sm:gap-6">
 
             {/* Search */}
             <button
@@ -75,80 +78,76 @@ const Navbar = () => {
                 setShowSearch(true)
                 navigate('/collection')
               }}
-              className="transition-transform duration-200 hover:scale-110"
+              className="flex h-10 w-10 items-center justify-center rounded-full text-slate-700 transition-all duration-200 hover:bg-slate-100 active:scale-95"
+              aria-label="Search"
             >
               <img
                 src={assets.search_icon}
-                className="w-5 cursor-pointer"
+                className="w-4 cursor-pointer opacity-80 transition-opacity hover:opacity-100"
                 alt="Search"
               />
             </button>
 
-            {/* Profile */}
+            {/* Profile Dropdown */}
             <div className="group relative hidden sm:block">
               <button
                 onClick={() => !token && navigate('/login')}
-                className="transition-transform duration-200 hover:scale-110"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-slate-700 transition-all duration-200 hover:bg-slate-100 active:scale-95"
+                aria-label="Account"
               >
                 <img
                   src={assets.profile_icon}
-                  className="w-5 cursor-pointer"
+                  className="w-4 cursor-pointer opacity-80 transition-opacity hover:opacity-100"
                   alt="Profile"
                 />
               </button>
 
-              {/* Profile Dropdown */}
               {token && (
-                <div className="absolute right-0 top-full hidden pt-4 group-hover:block">
-                  <div className="w-44 rounded-xl border border-gray-100 bg-white p-2 shadow-xl">
-
+                <div className="absolute right-0 top-full hidden pt-2 group-hover:block">
+                  <div className="w-48 overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 p-1.5 shadow-xl shadow-slate-900/10 backdrop-blur-md">
                     <button
-                      className="w-full rounded-lg px-4 py-3 text-left text-sm text-gray-600 transition hover:bg-gray-50 hover:text-black"
+                      onClick={() => navigate('/profile')}
+                      className="w-full rounded-xl px-4 py-2.5 text-left text-xs font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
                     >
                       My Profile
                     </button>
-
                     <button
                       onClick={() => navigate('/orders')}
-                      className="w-full rounded-lg px-4 py-3 text-left text-sm text-gray-600 transition hover:bg-gray-50 hover:text-black"
+                      className="w-full rounded-xl px-4 py-2.5 text-left text-xs font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
                     >
                       My Orders
                     </button>
-
-                    <div className="my-1 border-t border-gray-100" />
-
+                    <div className="my-1 border-t border-slate-100" />
                     <button
                       onClick={logout}
-                      className="w-full rounded-lg px-4 py-3 text-left text-sm text-red-500 transition hover:bg-red-50"
+                      className="w-full rounded-xl px-4 py-2.5 text-left text-xs font-semibold text-red-600 transition hover:bg-red-50"
                     >
                       Logout
                     </button>
-
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Cart */}
+            {/* Cart Icon with Pulse Badge */}
             <Link
               to="/cart"
-              className="group relative transition-transform duration-200 hover:scale-110"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-700 transition-all duration-200 hover:bg-slate-100 active:scale-95"
             >
               <img
                 src={assets.cart_icon}
-                className="w-5 min-w-5"
+                className="w-4 min-w-4 opacity-80 transition-opacity hover:opacity-100"
                 alt="Cart"
               />
-
-              <span className="absolute -right-2.5 -top-2 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-black px-1 text-[9px] font-medium text-white">
+              <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-slate-900 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
                 {getCartCount()}
               </span>
             </Link>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Toggle */}
             <button
               onClick={() => setVisible(true)}
-              className="sm:hidden transition-transform duration-200 hover:scale-110"
+              className="flex h-10 w-10 items-center justify-center rounded-full text-slate-700 transition-all duration-200 hover:bg-slate-100 sm:hidden"
             >
               <img
                 src={assets.menu_icon}
@@ -161,137 +160,88 @@ const Navbar = () => {
         </div>
       </header>
 
-      {/* Mobile Menu Backdrop */}
+      {/* Mobile Backdrop */}
       {visible && (
         <div
           onClick={() => setVisible(false)}
-          className="fixed inset-0 z-[60] bg-black/30 backdrop-blur-sm sm:hidden"
+          className="fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-sm sm:hidden"
         />
       )}
 
-      {/* Mobile Sidebar */}
+      {/* Mobile Drawer */}
       <div
-        className={`fixed right-0 top-0 z-[70] h-full w-[82%] max-w-sm bg-white shadow-2xl transition-transform duration-300 sm:hidden ${
+        className={`fixed right-0 top-0 z-[70] h-full w-[80%] max-w-sm bg-white shadow-2xl transition-transform duration-300 ease-in-out sm:hidden ${
           visible ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-
-        {/* Mobile Header */}
-        <div className="flex h-[72px] items-center justify-between border-b border-gray-100 px-5">
-
-          <img
-            src={assets.logo}
-            className="w-28"
-            alt="Store Logo"
-          />
-
+        <div className="flex h-[72px] items-center justify-between border-b border-slate-100 px-6">
+          <img src={assets.logo} className="w-28" alt="Store Logo" />
           <button
             onClick={() => setVisible(false)}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-xl text-gray-600 transition hover:bg-gray-200"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-lg text-slate-500 transition hover:bg-slate-200 hover:text-slate-900"
           >
             ×
           </button>
-
         </div>
 
-        {/* Mobile Navigation */}
-        <nav className="px-4 py-6">
-
-          <NavLink
-            onClick={() => setVisible(false)}
-            to="/"
-            className={({ isActive }) =>
-              `mb-2 flex items-center justify-between rounded-xl px-5 py-4 text-sm font-medium tracking-wide transition ${
-                isActive
-                  ? 'bg-black text-white'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-black'
-              }`
-            }
-          >
-            HOME
-            <span>→</span>
-          </NavLink>
-
-          <NavLink
-            onClick={() => setVisible(false)}
-            to="/collection"
-            className={({ isActive }) =>
-              `mb-2 flex items-center justify-between rounded-xl px-5 py-4 text-sm font-medium tracking-wide transition ${
-                isActive
-                  ? 'bg-black text-white'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-black'
-              }`
-            }
-          >
-            COLLECTION
-            <span>→</span>
-          </NavLink>
-
-          <NavLink
-            onClick={() => setVisible(false)}
-            to="/about"
-            className={({ isActive }) =>
-              `mb-2 flex items-center justify-between rounded-xl px-5 py-4 text-sm font-medium tracking-wide transition ${
-                isActive
-                  ? 'bg-black text-white'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-black'
-              }`
-            }
-          >
-            ABOUT
-            <span>→</span>
-          </NavLink>
-
-          <NavLink
-            onClick={() => setVisible(false)}
-            to="/contact"
-            className={({ isActive }) =>
-              `flex items-center justify-between rounded-xl px-5 py-4 text-sm font-medium tracking-wide transition ${
-                isActive
-                  ? 'bg-black text-white'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-black'
-              }`
-            }
-          >
-            CONTACT
-            <span>→</span>
-          </NavLink>
-
+        <nav className="p-4">
+          {['/', '/collection', '/about', '/contact'].map((path) => {
+            const label = path === '/' ? 'HOME' : path.replace('/', '').toUpperCase()
+            return (
+              <NavLink
+                key={path}
+                onClick={() => setVisible(false)}
+                to={path}
+                className={({ isActive }) =>
+                  `mb-1.5 flex items-center justify-between rounded-xl px-4 py-3 text-xs font-semibold tracking-wider transition ${
+                    isActive
+                      ? 'bg-slate-900 text-white'
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`
+                }
+              >
+                <span>{label}</span>
+                <span className="opacity-40">→</span>
+              </NavLink>
+            )
+          })}
         </nav>
 
-        {/* Mobile Account */}
-        <div className="absolute bottom-0 left-0 right-0 border-t border-gray-100 p-5">
-
+        {/* Mobile Footer Actions */}
+        <div className="absolute bottom-0 left-0 right-0 border-t border-slate-100 p-6 bg-slate-50/50">
           {token ? (
-            <>
+            <div className="space-y-2">
               <button
-                onClick={() => navigate('/orders')}
-                className="mb-3 w-full rounded-xl border border-gray-200 py-3 text-sm font-medium transition hover:bg-gray-50"
+                onClick={() => {
+                  setVisible(false)
+                  navigate('/orders')
+                }}
+                className="w-full rounded-xl border border-slate-200 bg-white py-3 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
               >
                 My Orders
               </button>
-
               <button
-                onClick={logout}
-                className="w-full rounded-xl bg-black py-3 text-sm font-medium text-white transition hover:bg-gray-800"
+                onClick={() => {
+                  setVisible(false)
+                  logout()
+                }}
+                className="w-full rounded-xl bg-slate-900 py-3 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800"
               >
                 Logout
               </button>
-            </>
+            </div>
           ) : (
             <button
               onClick={() => {
                 setVisible(false)
                 navigate('/login')
               }}
-              className="w-full rounded-xl bg-black py-3 text-sm font-medium text-white transition hover:bg-gray-800"
+              className="w-full rounded-xl bg-slate-900 py-3 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800"
             >
               Login
             </button>
           )}
-
         </div>
-
       </div>
     </>
   )
