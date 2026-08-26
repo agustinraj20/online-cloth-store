@@ -1,5 +1,7 @@
-import React from 'react'
+import { useEffect, useState } from 'react'
 import { Routes, Route } from 'react-router-dom'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 import Home from './pages/Home'
 import Collection from './pages/Collection'
@@ -16,14 +18,30 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import SearchBar from './components/SearchBar'
 
-import { ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
-
 const App = () => {
-  return (
-    <div className="min-h-screen bg-white text-gray-800">
+  const [isDark, setIsDark] = useState(() =>
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  )
 
-      {/* Toast Notifications */}
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+
+    const updateTheme = (event) => {
+      setIsDark(event.matches)
+    }
+
+    setIsDark(mediaQuery.matches)
+    mediaQuery.addEventListener('change', updateTheme)
+
+    return () => mediaQuery.removeEventListener('change', updateTheme)
+  }, [])
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDark)
+  }, [isDark])
+
+  return (
+    <div className="flex min-h-screen flex-col bg-white text-stone-800 transition-colors duration-300 dark:bg-[#0d0f12] dark:text-stone-100">
       <ToastContainer
         position="top-right"
         autoClose={2500}
@@ -31,18 +49,14 @@ const App = () => {
         newestOnTop
         closeOnClick
         pauseOnHover
-        theme="light"
+        theme={isDark ? 'dark' : 'light'}
       />
 
-      {/* Navbar */}
       <Navbar />
 
-      {/* Search */}
       <SearchBar />
 
-      {/* Main Content */}
-      <main className="mx-auto w-full max-w-[1600px] px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
-
+      <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/collection" element={<Collection />} />
@@ -54,13 +68,12 @@ const App = () => {
           <Route path="/place-order" element={<PlaceOrder />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/verify" element={<Verify />} />
-        </Routes>
 
+          <Route path="*" element={<Home />} />
+        </Routes>
       </main>
 
-      {/* Footer */}
       <Footer />
-
     </div>
   )
 }

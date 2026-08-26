@@ -19,6 +19,10 @@ const Product = () => {
       setProductData(selectedProduct)
       setImage(selectedProduct.image?.[0] || '')
       setSize('')
+    } else {
+      setProductData(null)
+      setImage('')
+      setSize('')
     }
   }, [productId, products])
 
@@ -35,7 +39,6 @@ const Product = () => {
   return (
     <main className="border-t border-stone-200 pt-8 sm:pt-12 dark:border-stone-800">
       <section className="grid gap-10 lg:grid-cols-2 lg:gap-16">
-        {/* Product images */}
         <div className="flex flex-col-reverse gap-4 sm:flex-row">
           <div className="flex gap-3 overflow-x-auto pb-1 sm:w-24 sm:flex-col sm:overflow-y-auto">
             {productData.image?.map((item, index) => (
@@ -72,7 +75,6 @@ const Product = () => {
           </div>
         </div>
 
-        {/* Product information */}
         <div className="flex flex-col justify-center">
           <p className="text-xs font-semibold tracking-[0.16em] text-amber-700 dark:text-amber-400">
             {productData.category?.toUpperCase()}
@@ -91,11 +93,13 @@ const Product = () => {
                 className="h-4 w-4"
               />
             ))}
+
             <img
               src={assets.star_dull_icon}
               alt=""
               className="h-4 w-4"
             />
+
             <span className="ml-2 text-sm text-stone-500 dark:text-stone-400">
               122 reviews
             </span>
@@ -149,7 +153,6 @@ const Product = () => {
         </div>
       </section>
 
-      {/* Description */}
       <section className="mt-16 sm:mt-24">
         <div className="flex border-b border-stone-200 dark:border-stone-800">
           <button
@@ -158,6 +161,7 @@ const Product = () => {
           >
             Description
           </button>
+
           <button
             type="button"
             className="px-5 py-4 text-sm text-stone-500 dark:text-stone-400"
@@ -168,6 +172,7 @@ const Product = () => {
 
         <div className="max-w-4xl space-y-4 py-6 text-sm leading-7 text-stone-600 sm:text-base dark:text-stone-400">
           <p>{productData.description}</p>
+
           <p>
             Every product is chosen for its quality, comfort, and versatile
             style—so it feels as good as it looks.
