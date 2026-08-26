@@ -8,7 +8,6 @@ export const ShopContext = createContext();
 const ShopContextProvider = (props) => {
     const currency = "₹ ";
     const delivery_fee = 50;
-
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     const [search, setSearch] = useState("");
@@ -19,16 +18,12 @@ const ShopContextProvider = (props) => {
 
     const navigate = useNavigate();
 
-    // =========================================================
-    // PRODUCT CACHE
-    // =========================================================
-
+    // LocalStorage key
     const PRODUCTS_CACHE_KEY = "shop_products";
 
-    // =========================================================
+    // =========================
     // ADD TO CART
-    // =========================================================
-
+    // =========================
     const addToCart = async (itemId, size) => {
         if (!size) {
             toast.error("Select Product Size");
@@ -50,25 +45,12 @@ const ShopContextProvider = (props) => {
 
         setCartItems(cartData);
 
-        // Save cart locally as well
-        localStorage.setItem(
-            "shop_cart",
-            JSON.stringify(cartData)
-        );
-
         if (token) {
             try {
                 await axios.post(
                     backendUrl + "/api/cart/add",
-                    {
-                        itemId,
-                        size,
-                    },
-                    {
-                        headers: {
-                            token,
-                        },
-                    }
+                    { itemId, size },
+                    { headers: { token } }
                 );
             } catch (error) {
                 console.log(error);
@@ -77,10 +59,9 @@ const ShopContextProvider = (props) => {
         }
     };
 
-    // =========================================================
+    // =========================
     // GET CART COUNT
-    // =========================================================
-
+    // =========================
     const getCartCount = () => {
         let totalCount = 0;
 
@@ -97,51 +78,32 @@ const ShopContextProvider = (props) => {
         return totalCount;
     };
 
-    // =========================================================
-    // UPDATE CART QUANTITY
-    // =========================================================
-
+    // =========================
+    // UPDATE QUANTITY
+    // =========================
     const updateQuantity = async (itemId, size, quantity) => {
         let cartData = structuredClone(cartItems);
 
-        if (!cartData[itemId]) {
-            return;
-        }
+        if (!cartData[itemId]) return;
 
         cartData[itemId][size] = quantity;
 
-        // Remove size if quantity is 0
         if (quantity <= 0) {
             delete cartData[itemId][size];
         }
 
-        // Remove product if no sizes remain
         if (Object.keys(cartData[itemId]).length === 0) {
             delete cartData[itemId];
         }
 
         setCartItems(cartData);
 
-        // Save updated cart locally
-        localStorage.setItem(
-            "shop_cart",
-            JSON.stringify(cartData)
-        );
-
         if (token) {
             try {
                 await axios.post(
                     backendUrl + "/api/cart/update",
-                    {
-                        itemId,
-                        size,
-                        quantity,
-                    },
-                    {
-                        headers: {
-                            token,
-                        },
-                    }
+                    { itemId, size, quantity },
+                    { headers: { token } }
                 );
             } catch (error) {
                 console.log(error);
@@ -150,10 +112,9 @@ const ShopContextProvider = (props) => {
         }
     };
 
-    // =========================================================
+    // =========================
     // GET CART AMOUNT
-    // =========================================================
-
+    // =========================
     const getCartAmount = () => {
         let totalAmount = 0;
 
@@ -162,9 +123,7 @@ const ShopContextProvider = (props) => {
                 (product) => product._id === items
             );
 
-            if (!itemInfo) {
-                continue;
-            }
+            if (!itemInfo) continue;
 
             for (const item in cartItems[items]) {
                 try {
@@ -180,10 +139,9 @@ const ShopContextProvider = (props) => {
         return totalAmount;
     };
 
-    // =========================================================
-    // FETCH PRODUCTS FROM BACKEND
-    // =========================================================
-
+    // =========================
+    // GET PRODUCTS FROM BACKEND
+    // =========================
     const getProductsData = async () => {
         try {
             console.log("Fetching products from backend...");
@@ -193,62 +151,52 @@ const ShopContextProvider = (props) => {
             );
 
             if (response.data.success) {
-                // Create a new array instead of modifying response directly
                 const productData = [
-                    ...response.data.products,
+                    ...response.data.products
                 ].reverse();
 
-                // Update React state
+                // Put products into React state
                 setProducts(productData);
 
-                // Save products to localStorage
+                // Save products in browser
                 localStorage.setItem(
                     PRODUCTS_CACHE_KEY,
                     JSON.stringify(productData)
                 );
 
                 console.log(
-                    "Products fetched and saved to localStorage."
+                    "Products fetched from backend and saved to localStorage"
                 );
             } else {
                 toast.error(response.data.message);
             }
         } catch (error) {
-            console.log("Product fetch error:", error);
+            console.log(error);
             toast.error(error.message);
         }
     };
 
-    // =========================================================
+    // =========================
     // LOAD PRODUCTS FROM LOCAL STORAGE
-    // =========================================================
-
+    // =========================
     const loadProductsFromCache = () => {
         try {
-            const cachedProducts = localStorage.getItem(
-                PRODUCTS_CACHE_KEY
-            );
+            const cachedProducts =
+                localStorage.getItem(PRODUCTS_CACHE_KEY);
 
-            // No cache
             if (!cachedProducts) {
-                console.log(
-                    "No cached products found."
-                );
-
+                console.log("No products found in localStorage");
                 return false;
             }
 
             const parsedProducts =
                 JSON.parse(cachedProducts);
 
-            // Check that cached data is an array
             if (
                 !Array.isArray(parsedProducts) ||
                 parsedProducts.length === 0
             ) {
-                console.log(
-                    "Product cache is empty or invalid."
-                );
+                console.log("Invalid product cache");
 
                 localStorage.removeItem(
                     PRODUCTS_CACHE_KEY
@@ -261,17 +209,16 @@ const ShopContextProvider = (props) => {
             setProducts(parsedProducts);
 
             console.log(
-                "Products loaded from localStorage."
+                "Products restored from localStorage"
             );
 
             return true;
         } catch (error) {
             console.log(
-                "Error loading product cache:",
+                "Error reading product cache:",
                 error
             );
 
-            // Remove broken cache
             localStorage.removeItem(
                 PRODUCTS_CACHE_KEY
             );
@@ -280,26 +227,9 @@ const ShopContextProvider = (props) => {
         }
     };
 
-    // =========================================================
-    // CLEAR PRODUCT CACHE
-    // =========================================================
-
-    const clearProductCache = () => {
-        localStorage.removeItem(
-            PRODUCTS_CACHE_KEY
-        );
-
-        setProducts([]);
-
-        console.log(
-            "Product cache cleared."
-        );
-    };
-
-    // =========================================================
-    // GET USER CART FROM BACKEND
-    // =========================================================
-
+    // =========================
+    // GET USER CART
+    // =========================
     const getUserCart = async (userToken) => {
         try {
             const response = await axios.post(
@@ -307,22 +237,14 @@ const ShopContextProvider = (props) => {
                 {},
                 {
                     headers: {
-                        token: userToken,
-                    },
+                        token: userToken
+                    }
                 }
             );
 
             if (response.data.success) {
                 setCartItems(
                     response.data.cartData
-                );
-
-                // Save cart locally
-                localStorage.setItem(
-                    "shop_cart",
-                    JSON.stringify(
-                        response.data.cartData
-                    )
                 );
             }
         } catch (error) {
@@ -331,31 +253,28 @@ const ShopContextProvider = (props) => {
         }
     };
 
-    // =========================================================
-    // LOAD PRODUCTS ON APP START
-    // =========================================================
-
+    // =========================
+    // LOAD PRODUCTS
+    // =========================
     useEffect(() => {
-        const productsFromCache =
+        const cachedProducts =
             loadProductsFromCache();
 
-        // Only call backend if there is NO cached data
-        if (!productsFromCache) {
+        // Only call backend if no cache exists
+        if (!cachedProducts) {
             getProductsData();
         }
     }, []);
 
-    // =========================================================
-    // LOAD TOKEN AND CART
-    // =========================================================
-
+    // =========================
+    // TOKEN / CART
+    // =========================
     useEffect(() => {
         const savedToken =
             localStorage.getItem("token");
 
         if (!token && savedToken) {
             setToken(savedToken);
-
             getUserCart(savedToken);
         }
 
@@ -364,45 +283,36 @@ const ShopContextProvider = (props) => {
         }
     }, [token]);
 
-    // =========================================================
+    // =========================
     // CONTEXT VALUE
-    // =========================================================
-
+    // =========================
     const value = {
-        // Products
         products,
-
-        // Currency
         currency,
         delivery_fee,
 
-        // Search
         search,
         setSearch,
+
         showSearch,
         setShowSearch,
 
-        // Cart
         cartItems,
         addToCart,
         setCartItems,
+
         getCartCount,
         updateQuantity,
         getCartAmount,
 
-        // Navigation
         navigate,
-
-        // Backend
         backendUrl,
 
-        // Authentication
         setToken,
         token,
 
-        // Optional product cache control
-        getProductsData,
-        clearProductCache,
+        // Optional manual refresh
+        getProductsData
     };
 
     return (
