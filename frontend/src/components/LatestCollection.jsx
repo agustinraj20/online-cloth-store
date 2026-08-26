@@ -1,34 +1,44 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useMemo } from 'react'
 import { ShopContext } from '../context/ShopContext'
-import Title from './Title';
-import ProductItem from './ProductItem';
+import Title from './Title'
+import ProductItem from './ProductItem'
 
 const LatestCollection = () => {
+  const { products = [] } = useContext(ShopContext)
 
-    const { products } = useContext(ShopContext);
-    const [latestProducts,setLatestProducts] = useState([]);
-
-    useEffect(()=>{
-        setLatestProducts(products.slice(0,10));
-    },[products])
+  const latestProducts = useMemo(() => products.slice(0, 10), [products])
 
   return (
-    <div className='my-10'>
-      <div className='text-center py-8 text-3xl'>
-          <Title text1={'LATEST'} text2={'COLLECTIONS'} />
-          <p className='w-3/4 m-auto text-xs sm:text-sm md:text-base text-gray-600'>
-          Fresh Finds Just for You          </p>
+    <section className="my-14 rounded-3xl border border-stone-200 bg-white px-4 py-10 sm:my-20 sm:px-8 md:px-10 dark:border-stone-800 dark:bg-stone-950">
+      <div className="mx-auto mb-9 max-w-2xl text-center sm:mb-12">
+        <div className="text-2xl sm:text-3xl md:text-4xl">
+          <Title text1="LATEST" text2="COLLECTIONS" />
+        </div>
+
+        <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-stone-600 sm:text-base dark:text-stone-400">
+          Fresh styles selected to bring effortless confidence to your everyday
+          wardrobe.
+        </p>
       </div>
 
-      {/* Rendering Products */}
-      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 gap-y-6'>
-        {
-          latestProducts.map((item,index)=>(
-            <ProductItem key={index} id={item._id} image={item.image} name={item.name} price={item.price} />
-          ))
-        }
+      <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:grid-cols-3 sm:gap-5 md:grid-cols-4 lg:grid-cols-5">
+        {latestProducts.map((item) => (
+          <ProductItem
+            key={item._id}
+            id={item._id}
+            name={item.name}
+            image={item.image}
+            price={item.price}
+          />
+        ))}
       </div>
-    </div>
+
+      {latestProducts.length === 0 && (
+        <p className="py-10 text-center text-sm text-stone-500 dark:text-stone-400">
+          New arrivals will appear here soon.
+        </p>
+      )}
+    </section>
   )
 }
 

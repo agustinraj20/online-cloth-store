@@ -1,39 +1,50 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useMemo } from 'react'
 import { ShopContext } from '../context/ShopContext'
-import Title from './Title';
-import ProductItem from './ProductItem';
+import Title from './Title'
+import ProductItem from './ProductItem'
 
-const RelatedProducts = ({category,subCategory}) => {
+const RelatedProducts = ({ category, subCategory, currentProductId }) => {
+  const { products = [] } = useContext(ShopContext)
 
-    const { products } = useContext(ShopContext);
-    const [related,setRelated] = useState([]);
+  const relatedProducts = useMemo(
+    () =>
+      products
+        .filter(
+          (item) =>
+            item._id !== currentProductId &&
+            item.category === category &&
+            item.subCategory === subCategory
+        )
+        .slice(0, 5),
+    [products, category, subCategory, currentProductId]
+  )
 
-    useEffect(()=>{
-
-        if (products.length > 0) {
-            
-            let productsCopy = products.slice();
-            
-            productsCopy = productsCopy.filter((item) => category === item.category);
-            productsCopy = productsCopy.filter((item) => subCategory === item.subCategory);
-
-            setRelated(productsCopy.slice(0,5));
-        }
-        
-    },[products])
+  if (!relatedProducts.length) return null
 
   return (
-    <div className='my-24'>
-      <div className=' text-center text-3xl py-2'>
-        <Title text1={'RELATED'} text2={"PRODUCTS"} />
+    <section className="my-16 border-t border-stone-200 pt-12 sm:my-20 sm:pt-16 dark:border-stone-800">
+      <div className="mb-8 text-center sm:mb-10">
+        <div className="text-2xl sm:text-3xl">
+          <Title text1="RELATED" text2="PRODUCTS" />
+        </div>
+
+        <p className="mx-auto mt-3 max-w-md text-sm text-stone-600 dark:text-stone-400">
+          Complete your look with more styles selected just for you.
+        </p>
       </div>
 
-      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 gap-y-6'>
-        {related.map((item,index)=>(
-            <ProductItem key={index} id={item._id} name={item.name} price={item.price} image={item.image}/>
+      <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:grid-cols-3 sm:gap-5 md:grid-cols-4 lg:grid-cols-5">
+        {relatedProducts.map((item) => (
+          <ProductItem
+            key={item._id}
+            id={item._id}
+            image={item.image}
+            name={item.name}
+            price={item.price}
+          />
         ))}
       </div>
-    </div>
+    </section>
   )
 }
 

@@ -1,101 +1,187 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { ShopContext } from '../context/ShopContext';
-import { assets } from '../assets/assets';
-import RelatedProducts from '../components/RelatedProducts';
+import { ShopContext } from '../context/ShopContext'
+import { assets } from '../assets/assets'
+import RelatedProducts from '../components/RelatedProducts'
 
 const Product = () => {
+  const { productId } = useParams()
+  const { products = [], currency, addToCart } = useContext(ShopContext)
 
-  const { productId } = useParams();
-  const { products, currency ,addToCart } = useContext(ShopContext);
-  const [productData, setProductData] = useState(false);
+  const [productData, setProductData] = useState(null)
   const [image, setImage] = useState('')
-  const [size,setSize] = useState('')
-
-  const fetchProductData = async () => {
-
-    products.map((item) => {
-      if (item._id === productId) {
-        setProductData(item)
-        setImage(item.image[0])
-        return null;
-      }
-    })
-
-  }
+  const [size, setSize] = useState('')
 
   useEffect(() => {
-    fetchProductData();
-  }, [productId,products])
+    const selectedProduct = products.find((item) => item._id === productId)
 
-  return productData ? (
-    <div className='border-t-2 pt-10 transition-opacity ease-in duration-500 opacity-100'>
-      {/*----------- Product Data-------------- */}
-      <div className='flex gap-12 sm:gap-12 flex-col sm:flex-row'>
+    if (selectedProduct) {
+      setProductData(selectedProduct)
+      setImage(selectedProduct.image?.[0] || '')
+      setSize('')
+    }
+  }, [productId, products])
 
-        {/*---------- Product Images------------- */}
-        <div className='flex-1 flex flex-col-reverse gap-3 sm:flex-row'>
-          <div className='flex sm:flex-col overflow-x-auto sm:overflow-y-scroll justify-between sm:justify-normal sm:w-[18.7%] w-full'>
-              {
-                productData.image.map((item,index)=>(
-                  <img onClick={()=>setImage(item)} src={item} key={index} className='w-[24%] sm:w-full sm:mb-3 flex-shrink-0 cursor-pointer' alt="" />
-                ))
-              }
-          </div>
-          <div className='w-full sm:w-[80%]'>
-              <img className='w-full h-auto' src={image} alt="" />
-          </div>
-        </div>
-
-        {/* -------- Product Info ---------- */}
-        <div className='flex-1'>
-          <h1 className='font-medium text-2xl mt-2'>{productData.name}</h1>
-          <div className=' flex items-center gap-1 mt-2'>
-              <img src={assets.star_icon} alt="" className="w-3 5" />
-              <img src={assets.star_icon} alt="" className="w-3 5" />
-              <img src={assets.star_icon} alt="" className="w-3 5" />
-              <img src={assets.star_icon} alt="" className="w-3 5" />
-              <img src={assets.star_dull_icon} alt="" className="w-3 5" />
-              <p className='pl-2'>(122)</p>
-          </div>
-          <p className='mt-5 text-3xl font-medium'>{currency}{productData.price}</p>
-          <p className='mt-5 text-gray-500 md:w-4/5'>{productData.description}</p>
-          <div className='flex flex-col gap-4 my-8'>
-              <p>Select Size</p>
-              <div className='flex gap-2'>
-                {productData.sizes.map((item,index)=>(
-                  <button onClick={()=>setSize(item)} className={`border py-2 px-4 bg-gray-100 ${item === size ? 'border-orange-500' : ''}`} key={index}>{item}</button>
-                ))}
-              </div>
-          </div>
-          <button onClick={()=>addToCart(productData._id,size)} className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700'>ADD TO CART</button>
-          <hr className='mt-8 sm:w-4/5' />
-          <div className='text-sm text-gray-500 mt-5 flex flex-col gap-1'>
-              <p>100% Original product.</p>
-              <p>Cash on delivery is available on this product.</p>
-              <p>Easy return and exchange policy within 7 days.</p>
-          </div>
-        </div>
+  if (!productData) {
+    return (
+      <div className="flex min-h-72 items-center justify-center text-sm text-stone-500 dark:text-stone-400">
+        Loading product…
       </div>
+    )
+  }
 
-      {/* ---------- Description & Review Section ------------- */}
-      <div className='mt-20'>
-        <div className='flex'>
-          <b className='border px-5 py-3 text-sm'>Description</b>
-          <p className='border px-5 py-3 text-sm'>Reviews (122)</p>
+  const formattedPrice = Number(productData.price || 0).toFixed(2)
+
+  return (
+    <main className="border-t border-stone-200 pt-8 sm:pt-12 dark:border-stone-800">
+      <section className="grid gap-10 lg:grid-cols-2 lg:gap-16">
+        {/* Product images */}
+        <div className="flex flex-col-reverse gap-4 sm:flex-row">
+          <div className="flex gap-3 overflow-x-auto pb-1 sm:w-24 sm:flex-col sm:overflow-y-auto">
+            {productData.image?.map((item, index) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => setImage(item)}
+                className={`h-24 w-20 shrink-0 overflow-hidden rounded-xl border-2 bg-stone-100 outline-none transition focus-visible:ring-2 focus-visible:ring-amber-500 dark:bg-stone-900 sm:h-28 sm:w-full ${
+                  image === item
+                    ? 'border-amber-600'
+                    : 'border-transparent hover:border-stone-300 dark:hover:border-stone-700'
+                }`}
+                aria-label={`View product image ${index + 1}`}
+                aria-pressed={image === item}
+              >
+                <img
+                  src={item}
+                  alt={`${productData.name} thumbnail ${index + 1}`}
+                  className="h-full w-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
+
+          <div className="aspect-[4/5] flex-1 overflow-hidden rounded-2xl bg-stone-100 dark:bg-stone-900">
+            {image && (
+              <img
+                src={image}
+                alt={productData.name}
+                className="h-full w-full object-cover"
+                fetchPriority="high"
+              />
+            )}
+          </div>
         </div>
-        <div className='flex flex-col gap-4 border px-6 py-6 text-sm text-gray-500'>
-          <p>An e-commerce website is an online platform that facilitates the buying and selling of products or services over the internet. It serves as a virtual marketplace where businesses and individuals can showcase their products, interact with customers, and conduct transactions without the need for a physical presence. E-commerce websites have gained immense popularity due to their convenience, accessibility, and the global reach they offer.</p>
-          <p>E-commerce websites typically display products or services along with detailed descriptions, images, prices, and any available variations (e.g., sizes, colors). Each product usually has its own dedicated page with relevant information.</p>
+
+        {/* Product information */}
+        <div className="flex flex-col justify-center">
+          <p className="text-xs font-semibold tracking-[0.16em] text-amber-700 dark:text-amber-400">
+            {productData.category?.toUpperCase()}
+          </p>
+
+          <h1 className="prata-regular mt-3 text-3xl leading-tight text-stone-950 sm:text-4xl dark:text-white">
+            {productData.name}
+          </h1>
+
+          <div className="mt-4 flex items-center gap-1">
+            {[1, 2, 3, 4].map((star) => (
+              <img
+                key={star}
+                src={assets.star_icon}
+                alt=""
+                className="h-4 w-4"
+              />
+            ))}
+            <img
+              src={assets.star_dull_icon}
+              alt=""
+              className="h-4 w-4"
+            />
+            <span className="ml-2 text-sm text-stone-500 dark:text-stone-400">
+              122 reviews
+            </span>
+          </div>
+
+          <p className="mt-6 text-3xl font-semibold text-stone-950 dark:text-white">
+            {currency} {formattedPrice}
+          </p>
+
+          <p className="mt-5 max-w-xl text-sm leading-7 text-stone-600 sm:text-base dark:text-stone-400">
+            {productData.description}
+          </p>
+
+          <fieldset className="mt-8">
+            <legend className="mb-3 text-sm font-semibold text-stone-950 dark:text-white">
+              Select size
+            </legend>
+
+            <div className="flex flex-wrap gap-2">
+              {productData.sizes?.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setSize(item)}
+                  className={`min-w-12 rounded-lg border px-4 py-2.5 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+                    item === size
+                      ? 'border-stone-950 bg-stone-950 text-white dark:border-white dark:bg-white dark:text-stone-950'
+                      : 'border-stone-200 bg-white text-stone-800 hover:border-amber-600 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200'
+                  }`}
+                  aria-pressed={item === size}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          <button
+            type="button"
+            onClick={() => addToCart(productData._id, size)}
+            className="mt-8 w-full rounded-full bg-stone-950 px-8 py-4 text-sm font-bold tracking-wider text-white transition hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:bg-white dark:text-stone-950 dark:hover:bg-amber-400 dark:focus:ring-offset-stone-950 sm:w-fit"
+          >
+            ADD TO CART
+          </button>
+
+          <div className="mt-8 border-t border-stone-200 pt-6 text-sm leading-7 text-stone-600 dark:border-stone-800 dark:text-stone-400">
+            <p>✓ 100% original product</p>
+            <p>✓ Cash on delivery available</p>
+            <p>✓ Easy return and exchange within 7 days</p>
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* --------- display related products ---------- */}
+      {/* Description */}
+      <section className="mt-16 sm:mt-24">
+        <div className="flex border-b border-stone-200 dark:border-stone-800">
+          <button
+            type="button"
+            className="border-b-2 border-stone-950 px-5 py-4 text-sm font-semibold text-stone-950 dark:border-white dark:text-white"
+          >
+            Description
+          </button>
+          <button
+            type="button"
+            className="px-5 py-4 text-sm text-stone-500 dark:text-stone-400"
+          >
+            Reviews (122)
+          </button>
+        </div>
 
-      <RelatedProducts category={productData.category} subCategory={productData.subCategory} />
+        <div className="max-w-4xl space-y-4 py-6 text-sm leading-7 text-stone-600 sm:text-base dark:text-stone-400">
+          <p>{productData.description}</p>
+          <p>
+            Every product is chosen for its quality, comfort, and versatile
+            style—so it feels as good as it looks.
+          </p>
+        </div>
+      </section>
 
-    </div>
-  ) : <div className=' opacity-0'></div>
+      <RelatedProducts
+        category={productData.category}
+        subCategory={productData.subCategory}
+        currentProductId={productData._id}
+      />
+    </main>
+  )
 }
 
 export default Product
