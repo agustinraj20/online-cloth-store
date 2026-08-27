@@ -8,32 +8,57 @@ export const ShopContext = createContext();
 const ShopContextProvider = (props) => {
     const currency = "₹ ";
     const delivery_fee = 50;
-    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+    const backendUrl =
+        import.meta.env.VITE_BACKEND_URL;
 
     const [search, setSearch] = useState("");
-    const [showSearch, setShowSearch] = useState(false);
-    const [cartItems, setCartItems] = useState({});
-    const [products, setProducts] = useState([]);
-    const [token, setToken] = useState("");
+    const [showSearch, setShowSearch] =
+        useState(false);
+
+    const [cartItems, setCartItems] =
+        useState({});
+
+    const [products, setProducts] =
+        useState([]);
+
+    const [token, setToken] =
+        useState("");
 
     const navigate = useNavigate();
 
-    // LocalStorage key
-    const PRODUCTS_CACHE_KEY = "shop_products";
+    // ============================================================
+    // PRODUCT CACHE KEYS
+    // ============================================================
 
-    // =========================
+    const PRODUCTS_CACHE_KEY =
+        "shop_products";
+
+    const PRODUCTS_VERSION_KEY =
+        "shop_products_version";
+
+    // ============================================================
     // ADD TO CART
-    // =========================
-    const addToCart = async (itemId, size) => {
+    // ============================================================
+
+    const addToCart = async (
+        itemId,
+        size
+    ) => {
         if (!size) {
-            toast.error("Select Product Size");
+            toast.error(
+                "Select Product Size"
+            );
             return;
         }
 
-        let cartData = structuredClone(cartItems);
+        let cartData =
+            structuredClone(cartItems);
 
         if (cartData[itemId]) {
-            if (cartData[itemId][size]) {
+            if (
+                cartData[itemId][size]
+            ) {
                 cartData[itemId][size] += 1;
             } else {
                 cartData[itemId][size] = 1;
@@ -48,28 +73,48 @@ const ShopContextProvider = (props) => {
         if (token) {
             try {
                 await axios.post(
-                    backendUrl + "/api/cart/add",
-                    { itemId, size },
-                    { headers: { token } }
+                    backendUrl +
+                        "/api/cart/add",
+                    {
+                        itemId,
+                        size,
+                    },
+                    {
+                        headers: {
+                            token,
+                        },
+                    }
                 );
             } catch (error) {
                 console.log(error);
-                toast.error(error.message);
+
+                toast.error(
+                    error.message
+                );
             }
         }
     };
 
-    // =========================
+    // ============================================================
     // GET CART COUNT
-    // =========================
+    // ============================================================
+
     const getCartCount = () => {
         let totalCount = 0;
 
         for (const items in cartItems) {
-            for (const item in cartItems[items]) {
+            for (const item in
+                cartItems[items]) {
                 try {
-                    if (cartItems[items][item] > 0) {
-                        totalCount += cartItems[items][item];
+                    if (
+                        cartItems[items][
+                            item
+                        ] > 0
+                    ) {
+                        totalCount +=
+                            cartItems[items][
+                                item
+                            ];
                     }
                 } catch (error) {}
             }
@@ -78,59 +123,85 @@ const ShopContextProvider = (props) => {
         return totalCount;
     };
 
-    // =========================
-    // UPDATE QUANTITY
-    // =========================
-    const updateQuantity = async (itemId, size, quantity) => {
-        let cartData = structuredClone(cartItems);
+    // ============================================================
+    // UPDATE CART
+    // ============================================================
 
-        if (!cartData[itemId]) return;
+    const updateQuantity = async (
+        itemId,
+        size,
+        quantity
+    ) => {
+        let cartData =
+            structuredClone(cartItems);
 
-        cartData[itemId][size] = quantity;
-
-        if (quantity <= 0) {
-            delete cartData[itemId][size];
+        if (!cartData[itemId]) {
+            return;
         }
 
-        if (Object.keys(cartData[itemId]).length === 0) {
-            delete cartData[itemId];
-        }
+        cartData[itemId][size] =
+            quantity;
 
         setCartItems(cartData);
 
         if (token) {
             try {
                 await axios.post(
-                    backendUrl + "/api/cart/update",
-                    { itemId, size, quantity },
-                    { headers: { token } }
+                    backendUrl +
+                        "/api/cart/update",
+                    {
+                        itemId,
+                        size,
+                        quantity,
+                    },
+                    {
+                        headers: {
+                            token,
+                        },
+                    }
                 );
             } catch (error) {
                 console.log(error);
-                toast.error(error.message);
+
+                toast.error(
+                    error.message
+                );
             }
         }
     };
 
-    // =========================
+    // ============================================================
     // GET CART AMOUNT
-    // =========================
+    // ============================================================
+
     const getCartAmount = () => {
         let totalAmount = 0;
 
         for (const items in cartItems) {
-            const itemInfo = products.find(
-                (product) => product._id === items
-            );
+            const itemInfo =
+                products.find(
+                    (product) =>
+                        product._id ===
+                        items
+                );
 
-            if (!itemInfo) continue;
+            if (!itemInfo) {
+                continue;
+            }
 
-            for (const item in cartItems[items]) {
+            for (const item in
+                cartItems[items]) {
                 try {
-                    if (cartItems[items][item] > 0) {
+                    if (
+                        cartItems[items][
+                            item
+                        ] > 0
+                    ) {
                         totalAmount +=
                             itemInfo.price *
-                            cartItems[items][item];
+                            cartItems[items][
+                                item
+                            ];
                     }
                 } catch (error) {}
             }
@@ -139,65 +210,117 @@ const ShopContextProvider = (props) => {
         return totalAmount;
     };
 
-    // =========================
-    // GET PRODUCTS FROM BACKEND
-    // =========================
+    // ============================================================
+    // FETCH PRODUCTS FROM BACKEND
+    // ============================================================
+
     const getProductsData = async () => {
         try {
-            console.log("Fetching products from backend...");
-
-            const response = await axios.get(
-                backendUrl + "/api/product/list"
+            console.log(
+                "Fetching latest products..."
             );
 
-            if (response.data.success) {
+            const response =
+                await axios.get(
+                    backendUrl +
+                        "/api/product/list"
+                );
+
+            if (
+                response.data.success
+            ) {
                 const productData = [
-                    ...response.data.products
+                    ...response.data
+                        .products,
                 ].reverse();
 
-                // Put products into React state
-                setProducts(productData);
+                setProducts(
+                    productData
+                );
 
-                // Save products in browser
+                // Save products
                 localStorage.setItem(
                     PRODUCTS_CACHE_KEY,
-                    JSON.stringify(productData)
+                    JSON.stringify(
+                        productData
+                    )
                 );
 
+                // Get latest version
+                try {
+                    const versionResponse =
+                        await axios.get(
+                            backendUrl +
+                                "/api/product/version"
+                        );
+
+                    if (
+                        versionResponse
+                            .data.success
+                    ) {
+                        localStorage.setItem(
+                            PRODUCTS_VERSION_KEY,
+                            String(
+                                versionResponse
+                                    .data
+                                    .version
+                            )
+                        );
+                    }
+                } catch (versionError) {
+                    console.log(
+                        "Version error:",
+                        versionError
+                    );
+                }
+
                 console.log(
-                    "Products fetched from backend and saved to localStorage"
+                    "Latest products saved."
                 );
             } else {
-                toast.error(response.data.message);
+                toast.error(
+                    response.data.message
+                );
             }
         } catch (error) {
-            console.log(error);
-            toast.error(error.message);
+            console.log(
+                "Product fetch error:",
+                error
+            );
+
+            toast.error(
+                error.message
+            );
         }
     };
 
-    // =========================
-    // LOAD PRODUCTS FROM LOCAL STORAGE
-    // =========================
+    // ============================================================
+    // LOAD PRODUCTS FROM CACHE
+    // ============================================================
+
     const loadProductsFromCache = () => {
         try {
             const cachedProducts =
-                localStorage.getItem(PRODUCTS_CACHE_KEY);
+                localStorage.getItem(
+                    PRODUCTS_CACHE_KEY
+                );
 
             if (!cachedProducts) {
-                console.log("No products found in localStorage");
                 return false;
             }
 
             const parsedProducts =
-                JSON.parse(cachedProducts);
+                JSON.parse(
+                    cachedProducts
+                );
 
             if (
-                !Array.isArray(parsedProducts) ||
-                parsedProducts.length === 0
+                !Array.isArray(
+                    parsedProducts
+                ) ||
+                parsedProducts.length ===
+                    0
             ) {
-                console.log("Invalid product cache");
-
                 localStorage.removeItem(
                     PRODUCTS_CACHE_KEY
                 );
@@ -205,17 +328,18 @@ const ShopContextProvider = (props) => {
                 return false;
             }
 
-            // Restore products
-            setProducts(parsedProducts);
+            setProducts(
+                parsedProducts
+            );
 
             console.log(
-                "Products restored from localStorage"
+                "Products loaded from localStorage."
             );
 
             return true;
         } catch (error) {
             console.log(
-                "Error reading product cache:",
+                "Cache error:",
                 error
             );
 
@@ -227,55 +351,172 @@ const ShopContextProvider = (props) => {
         }
     };
 
-    // =========================
-    // GET USER CART
-    // =========================
-    const getUserCart = async (userToken) => {
-        try {
-            const response = await axios.post(
-                backendUrl + "/api/cart/get",
-                {},
-                {
-                    headers: {
-                        token: userToken
-                    }
-                }
-            );
+    // ============================================================
+    // CHECK PRODUCT VERSION
+    // ============================================================
 
-            if (response.data.success) {
+    const checkProductVersion =
+        async () => {
+            try {
+                const response =
+                    await axios.get(
+                        backendUrl +
+                            "/api/product/version"
+                    );
+
+                if (
+                    !response.data.success
+                ) {
+                    return;
+                }
+
+                const serverVersion =
+                    String(
+                        response.data.version
+                    );
+
+                const localVersion =
+                    localStorage.getItem(
+                        PRODUCTS_VERSION_KEY
+                    );
+
+                console.log(
+                    "Local product version:",
+                    localVersion
+                );
+
+                console.log(
+                    "Server product version:",
+                    serverVersion
+                );
+
+                // =================================================
+                // VERSION HAS CHANGED
+                // =================================================
+
+                if (
+                    localVersion !==
+                    serverVersion
+                ) {
+                    console.log(
+                        "Products changed. Downloading latest products..."
+                    );
+
+                    await getProductsData();
+
+                    return;
+                }
+
+                console.log(
+                    "Products unchanged. Using localStorage."
+                );
+            } catch (error) {
+                console.log(
+                    "Product version check failed:",
+                    error
+                );
+
+                // IMPORTANT:
+                // If version check fails,
+                // keep using cached products.
+            }
+        };
+
+    // ============================================================
+    // CLEAR PRODUCT CACHE
+    // ============================================================
+
+    const clearProductCache = () => {
+        localStorage.removeItem(
+            PRODUCTS_CACHE_KEY
+        );
+
+        localStorage.removeItem(
+            PRODUCTS_VERSION_KEY
+        );
+
+        setProducts([]);
+
+        console.log(
+            "Product cache cleared."
+        );
+    };
+
+    // ============================================================
+    // USER CART
+    // ============================================================
+
+    const getUserCart = async (
+        userToken
+    ) => {
+        try {
+            const response =
+                await axios.post(
+                    backendUrl +
+                        "/api/cart/get",
+                    {},
+                    {
+                        headers: {
+                            token: userToken,
+                        },
+                    }
+                );
+
+            if (
+                response.data.success
+            ) {
                 setCartItems(
-                    response.data.cartData
+                    response.data
+                        .cartData
                 );
             }
         } catch (error) {
             console.log(error);
-            toast.error(error.message);
+
+            toast.error(
+                error.message
+            );
         }
     };
 
-    // =========================
-    // LOAD PRODUCTS
-    // =========================
+    // ============================================================
+    // INITIAL PRODUCT LOAD
+    // ============================================================
+
     useEffect(() => {
-        const cachedProducts =
+        const hasCachedProducts =
             loadProductsFromCache();
 
-        // Only call backend if no cache exists
-        if (!cachedProducts) {
+        if (hasCachedProducts) {
+            // We already have the products.
+            // Check only the small version endpoint.
+            checkProductVersion();
+        } else {
+            // No cache.
+            // Download products.
             getProductsData();
         }
     }, []);
 
-    // =========================
+    // ============================================================
     // TOKEN / CART
-    // =========================
+    // ============================================================
+
     useEffect(() => {
         const savedToken =
-            localStorage.getItem("token");
+            localStorage.getItem(
+                "token"
+            );
 
-        if (!token && savedToken) {
+        if (
+            !token &&
+            savedToken
+        ) {
             setToken(savedToken);
-            getUserCart(savedToken);
+
+            getUserCart(
+                savedToken
+            );
         }
 
         if (token) {
@@ -283,11 +524,13 @@ const ShopContextProvider = (props) => {
         }
     }, [token]);
 
-    // =========================
+    // ============================================================
     // CONTEXT VALUE
-    // =========================
+    // ============================================================
+
     const value = {
         products,
+
         currency,
         delivery_fee,
 
@@ -306,17 +549,20 @@ const ShopContextProvider = (props) => {
         getCartAmount,
 
         navigate,
+
         backendUrl,
 
         setToken,
         token,
 
-        // Optional manual refresh
-        getProductsData
+        getProductsData,
+        clearProductCache,
     };
 
     return (
-        <ShopContext.Provider value={value}>
+        <ShopContext.Provider
+            value={value}
+        >
             {props.children}
         </ShopContext.Provider>
     );

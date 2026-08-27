@@ -1,33 +1,81 @@
-import express from 'express'
+import express from "express";
 
 import {
     addProduct,
     listProducts,
     removeProduct,
-    singleProduct
-} from '../controllers/productController.js'
+    singleProduct,
+    getProductVersion,
+} from "../controllers/productController.js";
 
-import adminAuth from '../middleware/adminAuth.js'
-import upload from '../middleware/multer.js'
+import adminAuth from "../middleware/adminAuth.js";
+import upload from "../middleware/multer.js";
 
-const productRouter = express.Router()
+const productRouter = express.Router();
+
+// ============================================================
+// PRODUCT VERSION
+// ============================================================
+
+productRouter.get(
+    "/version",
+    getProductVersion
+);
+
+// ============================================================
+// ADD PRODUCT
+// ============================================================
 
 productRouter.post(
-    '/add',
+    "/add",
     adminAuth,
     upload.fields([
-        { name: 'image1', maxCount: 1 },
-        { name: 'image2', maxCount: 1 },
-        { name: 'image3', maxCount: 1 },
-        { name: 'image4', maxCount: 1 }
+        {
+            name: "image1",
+            maxCount: 1,
+        },
+        {
+            name: "image2",
+            maxCount: 1,
+        },
+        {
+            name: "image3",
+            maxCount: 1,
+        },
+        {
+            name: "image4",
+            maxCount: 1,
+        },
     ]),
     addProduct
-)
+);
 
-productRouter.get('/list', listProducts)
+// ============================================================
+// LIST PRODUCTS
+// ============================================================
 
-productRouter.post('/remove', adminAuth, removeProduct)
+productRouter.get(
+    "/list",
+    listProducts
+);
 
-productRouter.post('/single', singleProduct)
+// ============================================================
+// REMOVE PRODUCT
+// ============================================================
 
-export default productRouter
+productRouter.post(
+    "/remove",
+    adminAuth,
+    removeProduct
+);
+
+// ============================================================
+// SINGLE PRODUCT
+// ============================================================
+
+productRouter.post(
+    "/single",
+    singleProduct
+);
+
+export default productRouter;
